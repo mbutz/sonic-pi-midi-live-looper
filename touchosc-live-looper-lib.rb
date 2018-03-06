@@ -4,13 +4,6 @@
 
 # TODO: THINGS TO DO
 
-# Check problem with live loop :metro
-# From touchosc create live loop with length and name
-# set current_metro, ":metro" + track1_len (=> :metro8) for
-# metronome loop and sync param live_loop :track1
-
-# complete feedback section
-
 # solve problem: if track_len initially 4, :metro will also be
 # thus the playback loop will initially be synchronised with :metro
 # if e. g. track1_len = 8 this loop will play 4 beats to early because
@@ -142,6 +135,7 @@ end
 # Record track 1
 if get(:track1) == 1.0
   in_thread(name: :t1_rec) do
+    use_real_time
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
     puts "RECORD T1: #{get(:sync_metro)} <<< <<< <<<"
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
@@ -161,6 +155,7 @@ end
 # Record track 2
 if get(:track2) == 1.0
   in_thread(name: :t2_rec) do
+    use_real_time
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
     puts "RECORD T2: #{get(:sync_metro)} <<< <<< <<<"
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
@@ -180,6 +175,7 @@ end
 # Record track 3
 if get(:track3) == 1.0
   in_thread(name: :t3_rec) do
+    use_real_time
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
     puts "RECORD T3: #{get(:sync_metro)} <<< <<< <<<"
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
@@ -199,6 +195,7 @@ end
 # Record track 4
 if get(:track4) == 1.0
   in_thread(name: :t4_rec) do
+    use_real_time
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
     puts "RECORD T4: #{get(:sync_metro)} <<< <<< <<<"
     puts "+++++++++++++++++++++++++++++++++++++++++++++"
@@ -302,11 +299,11 @@ live_loop :record_fb, sync: :metro do
     sample tfb, amp: 1
     live_audio :audio_fb
   end
-  sleep 8
+  sleep get(:fbtrack_len)
 end
 
 # (Re)Play Tracks
 live_loop :play_fb, sync: :metro do
   sample tfb, amp: 1
-  sleep 8
+  sleep get(:fbtrack_len)
 end

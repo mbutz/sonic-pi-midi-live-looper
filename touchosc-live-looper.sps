@@ -30,7 +30,7 @@ set :track1_len, 4
 set :track2_len, 8
 set :track3_len, 8
 set :track4_len, 8
-##| set :fbtrack_len, 8
+set :fbtrack_len, 8
 
 # Initialization of looper and touchosc interface
 use_osc get(:ip), get(:port)
@@ -57,9 +57,9 @@ osc "/looper/feedback_vol/1/1", 1
 
 set :track1_vol, 0
 set :track2_vol, 0
-##| set :track3_vol, 0
-##| set :track4_vol, 0
-##| set :fb_vol, 0
+set :track3_vol, 0
+set :track4_vol, 0
+set :fb_vol, 0
 set :metro_vol, 0
 set :metro_toggle, 0
 set :track_len, 8
