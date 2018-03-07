@@ -5,6 +5,10 @@
 use_osc get(:ip), get(:port)
 
 # Initialization of looper and touchosc interface
+# You shouldn't need to touch this except maybe
+# the metronome: this will initially be switched on
+# and set to maximum volume; see end of file if you
+# want that to be changed
 use_osc get(:ip), get(:port)
 osc "/looper/track1_len", get(:track1_len)
 osc "/looper/track2_len", get(:track2_len)
@@ -24,13 +28,13 @@ osc "/looper/track_arm/2/2", 0
 osc "/looper/track_arm/1/1", 0
 osc "/looper/track_arm/1/2", 0
 
-osc "/looper/feedback_vol/1/1", 1
-
 set :track1_vol, 0
 set :track2_vol, 0
 set :track3_vol, 0
 set :track4_vol, 0
-set :fb_vol, 0
-set :metro_vol, 0
-set :metro_toggle, 0
+
+# FIXME: Check if this can be placed here and be removed from lib...
+# Initial setting of sync metronome live_loop name.
+set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+
 

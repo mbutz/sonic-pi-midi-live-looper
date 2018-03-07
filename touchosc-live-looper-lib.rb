@@ -2,51 +2,43 @@
 # filename: touchosc-live-looper-lib.rb
 # contact: Martin Butz, mb@mkblog.org
 
-# TODO: THINGS TO DO
-
-# solve problem: if track_len initially 4, :metro will also be
-# thus the playback loop will initially be synchronised with :metro
-# if e. g. track1_len = 8 this loop will play 4 beats to early because
-# synchronised with a :metro of 4 beats
-
-# Go button: let only be the record section (and whatever is necessary)
-# be dependant on reevaluation; all that can be should be done by
-# the control script
-
-# Do we need to have 2 metro loops? Or can we remove the sync_metro?
-# This would make things clearer.
-
-# check issue with recording amp 
-
 use_osc get(:ip), get(:port)
 use_bpm get(:my_bpm)
 
-
+# FIXME: Can this savely be removed? (Set in init script)
 # initial setting of sync metronome
-set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+# set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
 
+# Set up recording tracks
+# "tfb" stands for 'track with feedback loop'
+# All tracks can be addressed in a for further manipulation via:
+# 'sample "/.sonic-pi/store/default/cached_samples/track[1..4].wav"' resp.
+# 'sample "/.sonic-pi/store/default/cached_samples/tfb.wav"'
 t1 = buffer[:track1, get(:track1_len)]
 t2 = buffer[:track2, get(:track2_len)]
 t3 = buffer[:track3, get(:track3_len)]
 t4 = buffer[:track4, get(:track4_len)]
 tfb = buffer[:tfb, 8]
 
-# Get/set metronom volume
+# Get/set metronome volume
 live_loop :m_vol do
   use_real_time
   c = sync "/osc/looper/metro_vol"
   set :metro_vol, c[0]
 end
-# Start/stop metronom
+# Start/stop metronome
 live_loop :m do
   use_real_time
   c = sync "/osc/looper/metro"
   set :metro_toggle, c[0]
 end
 
-# beat marker
+# beat marker: loop for metronome immediatelly
+# See: https://github.com/samaaron/sonic-pi/issues/1730#issuecomment-353114957
 live_loop :beat do
-  sleep 1
+  # FIXME: does that work?
+  sleep 0.125
+  stop
 end
 
 ##############################################################
@@ -57,7 +49,7 @@ live_loop :t1 do
   c = sync "/osc/looper/track_arm/2/1"
   set :track1, c[0]
   set :track_len, get(:track1_len)
-  # set current metronom identifier
+  # set current metronome identifier, see live_loop :get(:sync_metro)
   set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
   sleep 1
 end
@@ -83,7 +75,6 @@ live_loop :t4 do
   c = sync "/osc/looper/track_arm/1/2"
   set :track4, c[0]
   set :track_len, get(:track4_len)
-  # create a live loop with a name according to its length
   set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
 end
 
@@ -91,9 +82,11 @@ end
 # Setup Metronome
 ##############################################################
 
-# set up metronom and mark 1 according to track length currently armed
+# Metronome beats reflect the choosen track: if track is 8 beats
+# long the metronome will be also; metronome marks '1' with louder
+# and deeper click.
+# Initially the metronome is set to: :track_len in 'touchosc_live_looper.sps'
 live_loop :metro, sync: :beat do
-  # metronom marks one with deeper click
   f = get(:track_len) - 1
   sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.0 if get(:metro_toggle) == 1
   sleep 1
@@ -103,12 +96,17 @@ live_loop :metro, sync: :beat do
   end
 end
 
+# TODO: Check if that extra live_loop is really necessary.
+# I had some difficulties to synchronize the recording and
+# playback; I came up with the (maybe unnecessary and to
+# complicated) solution to create an extra live_loop with
+# a dynamic name created according to choosen track length.
 live_loop get(:sync_metro), sync: :metro do
   sleep get(:track_len)
   stop # run once and then quit
 end
 
-# Get/set playback volume
+# Get playback volume from touchosc
 live_loop :t1_vol do
   use_real_time
   c = sync "/osc/looper/track1_vol"
@@ -149,9 +147,6 @@ end
 # Record track 2
 if get(:track2) == 1.0
   in_thread(name: :t2_rec) do
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    # puts "RECORD T2: #{get(:sync_metro)} <<< <<< <<<"
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t2, pre_amp: get(:rec_level) do
       osc "/looper/track2_rec", 1
@@ -168,9 +163,6 @@ end
 # Record track 3
 if get(:track3) == 1.0
   in_thread(name: :t3_rec) do
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    # puts "RECORD T3: #{get(:sync_metro)} <<< <<< <<<"
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t3, pre_amp: get(:rec_level) do
       osc "/looper/track3_rec", 1
@@ -187,9 +179,6 @@ end
 # Record track 4
 if get(:track4) == 1.0
   in_thread(name: :t4_rec) do
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    # puts "RECORD T4: #{get(:sync_metro)} <<< <<< <<<"
-    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t4, pre_amp: get(:rec_level) do
       osc "/looper/track4_rec", 1
@@ -205,44 +194,40 @@ if get(:track4) == 1.0
 end
 
 # (Re)Play Tracks
+# TODO: Here also the synchronization is kind of
+# tricky; it works when setting a cue at the end
+# of the respective recording loop (e. g. thread :t1_rec)
+# and synchronize playback with it.
 live_loop :play_t1, sync: :t1_rec do
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  # puts "PLAY BACK T1 <<< <<< <<<"
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t1, amp: get(:track1_vol)
   sleep get(:track1_len)
 end
 live_loop :play_t2, sync: :t2_rec do
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  # puts "PLAY BACK T2 <<< <<< <<<"
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t2, amp: get(:track2_vol)
   sleep get(:track2_len)
 end
 live_loop :play_t3, sync: :t3_rec do
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  # puts "PLAY BACK T3 <<< <<< <<<"
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t3, amp: get(:track3_vol)
   sleep get(:track3_len)
 end
 live_loop :play_t4, sync: :t4_rec do
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  # puts "PLAY BACK T4 <<< <<< <<<"
-  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t4, amp: get(:track4_vol)
   sleep get(:track4_len)
 end
 
 # Feedback Loop Section
-# Get/set feedback volume = fader delay
+# Get feedback volume from touchosc
+# Feedback volume = volume for rerecording pevious loop sound:
+# the lower this is the faster the loop will fade.
+# 0.00 = bottom button = no feedback loop
+# 1.45 = top button = feedback loop will play forever allthough
+# with every record the sound will change and probably loose quality.
 live_loop :osc_sync_feedback_vol0 do
   use_real_time
   c = sync "/osc/looper/feedback_vol/1/1"
   if c[0] == 1.0
     set :fb_vol, 0
   end
-  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol1 do
   use_real_time
@@ -250,7 +235,6 @@ live_loop :osc_sync_feedback_vol1 do
   if c[0] == 1.0
     set :fb_vol, 1.05
   end
-  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol2 do
   use_real_time
@@ -258,7 +242,6 @@ live_loop :osc_sync_feedback_vol2 do
   if c[0] == 1.0
     set :fb_vol, 1.15
   end
-  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol3 do
   use_real_time
@@ -266,7 +249,6 @@ live_loop :osc_sync_feedback_vol3 do
   if c[0] == 1.0
     set :fb_vol, 1.25
   end
-  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol4 do
   use_real_time
@@ -274,7 +256,6 @@ live_loop :osc_sync_feedback_vol4 do
   if c[0] == 1.0
     set :fb_vol, 1.35
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol5 do
   use_real_time
@@ -282,7 +263,6 @@ live_loop :osc_sync_feedback_vol5 do
   if c[0] == 1.0
     set :fb_vol, 1.45
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 
 live_loop :record_fb, sync: :metro do
