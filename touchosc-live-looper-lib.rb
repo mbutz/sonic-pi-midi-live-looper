@@ -18,63 +18,18 @@
 
 # check issue with recording amp 
 
-
 use_osc get(:ip), get(:port)
-
 use_bpm get(:my_bpm)
+
+
+# initial setting of sync metronome
+set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
 
 t1 = buffer[:track1, get(:track1_len)]
 t2 = buffer[:track2, get(:track2_len)]
 t3 = buffer[:track3, get(:track3_len)]
 t4 = buffer[:track4, get(:track4_len)]
 tfb = buffer[:tfb, 8]
-
-# Get/set track to be armed
-live_loop :t1 do
-  use_real_time
-  c = sync "/osc/looper/track_arm/2/1"
-  set :track1, c[0]
-  set :track_len, get(:track1_len)
-  # set current metronom identifier
-  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "ARM 1 metro: #{get(:sync_metro)} <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-end
-
-live_loop :t2 do
-  use_real_time
-  c = sync "/osc/looper/track_arm/2/2"
-  set :track2, c[0]
-  set :track_len, get(:track2_len)
-  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "ARM 2 metro: #{get(:sync_metro)} <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-end
-
-live_loop :t3 do
-  use_real_time
-  c = sync "/osc/looper/track_arm/1/1"
-  set :track3, c[0]
-  set :track_len, get(:track3_len)
-  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "ARM 3 metro: #{get(:sync_metro)} <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-end
-
-live_loop :t4 do
-  use_real_time
-  c = sync "/osc/looper/track_arm/1/2"
-  set :track4, c[0]
-  set :track_len, get(:track4_len)
-  # create a live loop with a name according to its length
-  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  #puts "ARM 4 metro: #{get(:sync_metro)} <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-end
 
 # Get/set metronom volume
 live_loop :m_vol do
@@ -93,6 +48,49 @@ end
 live_loop :beat do
   sleep 1
 end
+
+##############################################################
+# Get/set track to be armed
+##############################################################
+live_loop :t1 do
+  use_real_time
+  c = sync "/osc/looper/track_arm/2/1"
+  set :track1, c[0]
+  set :track_len, get(:track1_len)
+  # set current metronom identifier
+  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+  sleep 1
+end
+
+live_loop :t2 do
+  use_real_time
+  c = sync "/osc/looper/track_arm/2/2"
+  set :track2, c[0]
+  set :track_len, get(:track2_len)
+  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+end
+
+live_loop :t3 do
+  use_real_time
+  c = sync "/osc/looper/track_arm/1/1"
+  set :track3, c[0]
+  set :track_len, get(:track3_len)
+  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+end
+
+live_loop :t4 do
+  use_real_time
+  c = sync "/osc/looper/track_arm/1/2"
+  set :track4, c[0]
+  set :track_len, get(:track4_len)
+  # create a live loop with a name according to its length
+  set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
+end
+
+##############################################################
+# Setup Metronome
+##############################################################
+
 # set up metronom and mark 1 according to track length currently armed
 live_loop :metro, sync: :beat do
   # metronom marks one with deeper click
@@ -100,7 +98,7 @@ live_loop :metro, sync: :beat do
   sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.0 if get(:metro_toggle) == 1
   sleep 1
   f.times do
-    sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master), rate: 1.25 if get(:metro_toggle) == 1
+    sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master) * 0.5, rate: 1.25 if get(:metro_toggle) == 1
     sleep 1
   end
 end
@@ -135,13 +133,9 @@ end
 # Record track 1
 if get(:track1) == 1.0
   in_thread(name: :t1_rec) do
-    use_real_time
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    puts "RECORD T1: #{get(:sync_metro)} <<< <<< <<<"
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
+    osc "/looper/track1_rec", 1
     with_fx :record, buffer: t1, pre_amp: get(:rec_level) do
-      osc "/looper/track1_rec", 1
       live_audio :audio_in1, stereo: true
     end
     sleep get(:track1_len)
@@ -155,10 +149,9 @@ end
 # Record track 2
 if get(:track2) == 1.0
   in_thread(name: :t2_rec) do
-    use_real_time
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    puts "RECORD T2: #{get(:sync_metro)} <<< <<< <<<"
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "RECORD T2: #{get(:sync_metro)} <<< <<< <<<"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t2, pre_amp: get(:rec_level) do
       osc "/looper/track2_rec", 1
@@ -175,10 +168,9 @@ end
 # Record track 3
 if get(:track3) == 1.0
   in_thread(name: :t3_rec) do
-    use_real_time
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    puts "RECORD T3: #{get(:sync_metro)} <<< <<< <<<"
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "RECORD T3: #{get(:sync_metro)} <<< <<< <<<"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t3, pre_amp: get(:rec_level) do
       osc "/looper/track3_rec", 1
@@ -195,10 +187,9 @@ end
 # Record track 4
 if get(:track4) == 1.0
   in_thread(name: :t4_rec) do
-    use_real_time
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
-    puts "RECORD T4: #{get(:sync_metro)} <<< <<< <<<"
-    puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+    # puts "RECORD T4: #{get(:sync_metro)} <<< <<< <<<"
+    # puts "+++++++++++++++++++++++++++++++++++++++++++++"
     sync (get(:sync_metro).to_s).to_sym
     with_fx :record, buffer: t4, pre_amp: get(:rec_level) do
       osc "/looper/track4_rec", 1
@@ -215,30 +206,30 @@ end
 
 # (Re)Play Tracks
 live_loop :play_t1, sync: :t1_rec do
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "PLAY BACK T1 <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "PLAY BACK T1 <<< <<< <<<"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t1, amp: get(:track1_vol)
   sleep get(:track1_len)
 end
-live_loop :play_t2, sync: :t2_rec do #  sync get(:sync_metro)
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "PLAY BACK T2 <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
+live_loop :play_t2, sync: :t2_rec do
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "PLAY BACK T2 <<< <<< <<<"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t2, amp: get(:track2_vol)
   sleep get(:track2_len)
 end
 live_loop :play_t3, sync: :t3_rec do
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "PLAY BACK T3 <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "PLAY BACK T3 <<< <<< <<<"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t3, amp: get(:track3_vol)
   sleep get(:track3_len)
 end
 live_loop :play_t4, sync: :t4_rec do
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
-  puts "PLAY BACK T4 <<< <<< <<<"
-  puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
+  # puts "PLAY BACK T4 <<< <<< <<<"
+  # puts "+++++++++++++++++++++++++++++++++++++++++++++"
   sample t4, amp: get(:track4_vol)
   sleep get(:track4_len)
 end
@@ -251,7 +242,7 @@ live_loop :osc_sync_feedback_vol0 do
   if c[0] == 1.0
     set :fb_vol, 0
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
+  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol1 do
   use_real_time
@@ -259,7 +250,7 @@ live_loop :osc_sync_feedback_vol1 do
   if c[0] == 1.0
     set :fb_vol, 1.05
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
+  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol2 do
   use_real_time
@@ -267,7 +258,7 @@ live_loop :osc_sync_feedback_vol2 do
   if c[0] == 1.0
     set :fb_vol, 1.15
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
+  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol3 do
   use_real_time
@@ -275,7 +266,7 @@ live_loop :osc_sync_feedback_vol3 do
   if c[0] == 1.0
     set :fb_vol, 1.25
   end
-  puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
+  # puts "-+-+-+- #{get(:fb_vol)} -+-+-+-"
 end
 live_loop :osc_sync_feedback_vol4 do
   use_real_time
