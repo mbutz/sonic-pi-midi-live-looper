@@ -41,10 +41,10 @@ To set the live looper up you will have to do the following:
   * Remember the local IP address of you smartphone which will be display at the bottom of touchosc's OSC dialogue.
 * Copy the files `touchosc-live-looper-init.rb` and `touchosc-live-looper-lib.rb` to your harddrive 
 * Load the controller script `touchosc-live-looper.sps` into Sonic Pi and do some configuration
-  * `:ip` of the computer where you are running the script.
-  * `:port`, which is the port of your smarthone (see above)
-  * Set the path of the library script via the variable `:path`
-  * All the rest you can leave as it is for the start
+  * `:ip` of the mobile device
+  * `:port`, which is the port on your mobile device
+  * Set the path of the library script via the variable `:path`.
+  * All the rest you can leave as it is for the start and adjust at a later time.
 * Run the controller script in Sonic Pi and you should hear the metronome.
 * And - of course - you will need some sound input to record (accordingly you will have to configure your sound system which I do with Jack under Linux)
 
