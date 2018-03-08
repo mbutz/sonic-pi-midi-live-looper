@@ -54,8 +54,8 @@ To set the live looper up you will have to do at least the following:
 One of the more interesting things is to record some sound and work with it in a separate buffer. You can address all 4 tracks (and the feedback loop) for further manipulation in a separate buffer via:
 
 ```
-sample "/.sonic-pi/store/default/cached_samples/track[1..4].wav"
-sample "/.sonic-pi/store/default/cached_samples/tfb.wav"
+sample "~/.sonic-pi/store/default/cached_samples/track[1..4].wav"
+sample "~/.sonic-pi/store/default/cached_samples/tfb.wav"
 ```
 
 Try e. g. with a 4-beat-loop:
