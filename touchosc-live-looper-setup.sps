@@ -1,3 +1,7 @@
+# key: live looper
+# point_line: 15
+# point_index: 9
+# --
 # Live Looper Library with TouchOSC Control
 # filename: touchosc-live-looper-setup.sps
 # contact: Martin Butz, mb@mkblog.org
