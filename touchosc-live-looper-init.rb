@@ -20,9 +20,6 @@ osc "/looper/track2_vol", 0
 osc "/looper/track3_vol", 0
 osc "/looper/track4_vol", 0
 
-osc "/looper/metro_vol", 0
-osc "/looper/metro", 0
-
 osc "/looper/track_arm/2/1", 0
 osc "/looper/track_arm/2/2", 0
 osc "/looper/track_arm/1/1", 0
@@ -32,9 +29,4 @@ set :track1_vol, 0
 set :track2_vol, 0
 set :track3_vol, 0
 set :track4_vol, 0
-
-# FIXME: Check if this can be placed here and be removed from lib...
-# Initial setting of sync metronome live_loop name.
-set :sync_metro, ("metro" + get(:track_len).to_s).to_sym
-
 
