@@ -51,7 +51,7 @@ set :metro_vol_master, 4 # master metronome volume
 
 # Track length for your 4 recordings tracks/loops; you can have any number of beats:
 set :track_len, 8 # before having choosen a track metronome will count this
-set :track1_len, 4 # length of loop 1
+set :track1_len, 8 # length of loop 1
 set :track2_len, 8 # length of loop 2
 set :track3_len, 8 # length of loop 3
 set :track4_len, 8 # length of loop 4
