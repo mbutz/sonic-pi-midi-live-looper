@@ -68,8 +68,3 @@ end
 ```
 
 Note: The path syntax is for Linux. You will have to adjust the path if working with Windows or MacOSX.
-
-## Known Issues
-
-* I had some difficulties to synchronise the recording and the playback. It sometimes happens, that e. g. you have a 4-beat- and a 8-beat-loop. After playing around with the `Live Looper` some time the 8-bar-loop recording will start playing 4 beats too early. I have no idea why this is happening. Any hints are highly appreciated.
-* As Sonic Pi records faithfully you will have to have a good timing while playing live sound to achieve the wanted results. Nevertheless I think there are some latency issues involved. This might be due to hardware limitations; I would highly appreciate if I could simplify the code as much as possible to reduce hardware load. Also here any tips are highly appreciated. Maybe it is a bug ...
