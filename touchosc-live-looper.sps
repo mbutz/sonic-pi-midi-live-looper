@@ -50,23 +50,17 @@ set :metro_vol, 1 # ... set max. volume
 set :metro_vol_master, 4 # master metronome volume
 
 # Track length for your 4 recordings tracks/loops; you can have any number of beats:
-set :track_len, 8 # before having choosen a track metronome will count this
 set :track1_len, 8 # length of loop 1
 set :track2_len, 8 # length of loop 2
 set :track3_len, 8 # length of loop 3
 set :track4_len, 8 # length of loop 4
-set :fbtrack_len, 8 # length of feedback loop
-set :fb_vol, 0 # playback volume of feedback loop; initially switched off
+set :fbtrack_len, 8 # length of feedback loops
 
 # -----------------------------------------------------------------#
 # Initialization of looper and touchosc interface                  #
 # -----------------------------------------------------------------#
 
 use_osc get(:ip), get(:port)
-osc "/looper/track1_len", get(:track1_len)
-osc "/looper/track2_len", get(:track2_len)
-osc "/looper/track3_len", get(:track3_len)
-osc "/looper/track4_len", get(:track4_len)
 
 # Initialize live looper, see: "touchosc-live-looper-init.rb".
 run_file get(:path) + get(:init)
@@ -75,14 +69,6 @@ run_file get(:path) + get(:lib)
 # Switch on metronome by default.
 osc "/looper/metro_vol", 1
 osc "/looper/metro", 1
-
-osc "/looper/track_arm/2/1", 0
-osc "/looper/track_arm/2/2", 0
-osc "/looper/track_arm/1/1", 0
-osc "/looper/track_arm/1/2", 0
-
-# Switch off feedback loop by default.
-osc "/looper/feedback_vol/1/1", 1
 
 # Listen to 'record button' and execute lib
 live_loop :go do
