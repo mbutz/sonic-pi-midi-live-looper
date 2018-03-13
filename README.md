@@ -61,7 +61,7 @@ sample "~/.sonic-pi/store/default/cached_samples/tfb.wav"
 Try e. g. with a 4-beat-loop:
 
 ```
-live_loop :my_track, sync: :metro do
+live_loop :my_track, sync: :play_t1 do # for syncing also available: :play_t[2..4]
   sample "~/.sonic-pi/store/default/cached_samples/track1.wav", beat_stretch: 8
   sleep 8
 end
