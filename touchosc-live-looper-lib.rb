@@ -16,31 +16,16 @@ use_bpm get(:my_bpm)
 # -----------------------------------------------------------------#
 
 # Get/set metronome volume
-live_loop :m_vol do
+live_loop :metro_amp do
   use_real_time
   c = sync "/osc/looper/metro_vol"
   set :metro_vol, c[0]
 end
 # Start/stop metronome
-live_loop :m do
+live_loop :metro_onoff do
   use_real_time
   c = sync "/osc/looper/metro"
   set :metro_toggle, c[0]
-end
-
-# Metronome reflects number of beats of the choosen track: if track is 8 beats
-# long the metronome will be also; metronome marks '1' with louder
-# and deeper click.
-# The metronome will start, once a recording track has been selected.
-
-define :metronome do | len |
-  f = len - 1
-  sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.0 if get(:metro_toggle) == 1
-  sleep 1
-  f.times do
-    sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master) * 0.5, rate: 1.25 if get(:metro_toggle) == 1
-    sleep 1
-  end
 end
 
 # -----------------------------------------------------------------#
@@ -80,6 +65,145 @@ live_loop :t4 do
   set :track_len, get(:track4_len)
 end
 
+# Metronome resides here because it needs to be 'track_len' set
+live_loop :metro do
+  f = get(:track_len) - 1
+  sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 0.75 if get(:metro_toggle) == 1
+  sleep 1
+  f.times do
+    sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master) * 0.5, rate: 1.00 if get(:metro_toggle) == 1
+    sleep 1
+  end
+end
+
+
+# -----------------------------------------------------------------#
+# Record Tracks                                                    #
+# -----------------------------------------------------------------#
+# # Track 1
+if get(:track1) == 1
+  live_loop :t1_rec, sync: :metro do
+    use_real_time
+
+    n = get(:track1_len) / 2.0
+    sleep n + 1
+    n.times do
+      sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
+      sleep 1
+    end
+
+    sample_free "~/.sonic-pi/store/default/cached_samples/track1.wav"
+    osc "/looper/track1_rec", 1
+
+    with_fx :record, buffer: t1, pre_amp: get(:rec_level) do
+      live_audio :audio_in1, stereo: true
+    end
+
+    sleep get(:track1_len) - 1
+    sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 2.0 if get(:metro_toggle) == 1
+    cue :play_track1
+    sleep 1
+    live_audio :audio_in1, :stop
+    set :track1, 0
+    osc "/looper/track_arm/2/1", 0
+    osc "/looper/track1_rec", 0
+    stop
+  end
+end
+
+# Track 2
+if get(:track2) == 1
+  live_loop :t2_rec, sync: :metro do
+    use_real_time
+
+    n = get(:track2_len) / 2.0
+    sleep n + 1
+    n.times do
+      sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
+      sleep 1
+    end
+
+    sample_free "~/.sonic-pi/store/default/cached_samples/track2.wav"
+    osc "/looper/track2_rec", 1
+
+    with_fx :record, buffer: t2, pre_amp: get(:rec_level) do
+      live_audio :audio_in2, stereo: true
+    end
+
+    sleep get(:track2_len) - 1
+    sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 2.0 if get(:metro_toggle) == 1
+    cue :play_track2
+    sleep 1
+    osc "/looper/track_arm/2/2", 0
+    osc "/looper/track2_rec", 0
+    live_audio :audio_in2, :stop
+    set :track2, 0
+    stop
+  end
+end
+
+# Track 3
+if get(:track3) == 1
+  live_loop :t3_rec, sync: :metro do
+    use_real_time
+
+    n = get(:track3_len) / 2.0
+    sleep n + 1
+    n.times do
+      sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
+      sleep 1
+    end
+
+    sample_free "~/.sonic-pi/store/default/cached_samples/track3.wav"
+    osc "/looper/track3_rec", 1
+
+    with_fx :record, buffer: t3, pre_amp: get(:rec_level) do
+      live_audio :audio_in3, stereo: true
+    end
+
+    sleep get(:track3_len) - 1
+    sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 2.0 if get(:metro_toggle) == 1
+    cue :play_track3
+    sleep 1
+    osc "/looper/track_arm/1/1", 0
+    osc "/looper/track3_rec", 0
+    live_audio :audio_in3, :stop
+    set :track3, 0
+    stop
+  end
+end
+
+# Track 4
+if get(:track4) == 1
+  live_loop :t4_rec, sync: :metro do
+    use_real_time
+
+    n = get(:track4_len) / 2.0
+    sleep n + 1
+    n.times do
+      sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
+      sleep 1
+    end
+
+    sample_free "~/.sonic-pi/store/default/cached_samples/track4.wav"
+    osc "/looper/track4_rec", 1
+
+    with_fx :record, buffer: t4, pre_amp: get(:rec_level) do
+      live_audio :audio_in4, stereo: true
+    end
+
+    sleep get(:track4_len) - 1
+    sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 2.0 if get(:metro_toggle) == 1
+    cue :play_track4
+    sleep 1
+    osc "/looper/track_arm/1/2", 0
+    osc "/looper/track4_rec", 0
+    live_audio :audio_in4, :stop
+    set :track4, 0
+    stop
+  end
+end
+
 # -----------------------------------------------------------------#
 # (Re)Play Tracks                                                  #
 # -----------------------------------------------------------------#
@@ -106,106 +230,24 @@ live_loop :t4_vol do
   set :track4_vol, c[0]
 end
 
-# Play tracks, switch metronome on if recording track is slected
-live_loop :play_t1 do
+# Play tracks
+live_loop :play_t1, sync: :play_track1 do
   sample t1, amp: get(:track1_vol)
-  if get(:track1) == 1.0
-    metronome(get(:track1_len))
-  else
-    sleep get(:track1_len)
-  end
+  sleep get(:track1_len)
 end
-live_loop :play_t2 do
+live_loop :play_t2, sync: :play_track2 do
   sample t2, amp: get(:track2_vol)
-  if get(:track2) == 1.0
-    metronome(get(:track2_len))
-  else
-    sleep get(:track2_len)
-  end
+  sleep get(:track2_len)
 end
-live_loop :play_t3 do
+live_loop :play_t3, sync: :play_track3 do
   sample t3, amp: get(:track3_vol)
-  if get(:track3) == 1.0
-    metronome(get(:track3_len))
-  else
-    sleep get(:track3_len)
-  end
+  sleep get(:track3_len)
 end
-live_loop :play_t4 do
+live_loop :play_t4, sync: :play_track4 do
   sample t4, amp: get(:track4_vol)
-  if get(:track4) == 1.0
-    metronome(get(:track4_len))
-  else
-    sleep get(:track4_len)
-  end
+  sleep get(:track4_len)
 end
 
-# -----------------------------------------------------------------#
-# Record Tracks                                                    #
-# -----------------------------------------------------------------#
-
-# Track 1
-if get(:track1) == 1.0
-  in_thread(name: :t1_rec) do
-    sync :play_t1
-    sample_free "~/.sonic-pi/store/default/cached_samples/track1.wav"
-    with_fx :record, buffer: t1, pre_amp: get(:rec_level) do
-      osc "/looper/track1_rec", 1
-      live_audio :audio_in1, stereo: true
-    end
-    sleep get(:track1_len)
-    live_audio :audio_in1, :stop
-    osc "/looper/track_arm/2/1", 0
-    osc "/looper/track1_rec", 0
-    set :track1, 0
-  end
-end
-# Track 2
-if get(:track2) == 1.0
-  in_thread(name: :t2_rec) do
-    sync :play_t2
-    sample_free "~/.sonic-pi/store/default/cached_samples/track2.wav"
-    with_fx :record, buffer: t2, pre_amp: get(:rec_level) do
-      osc "/looper/track2_rec", 1
-      live_audio :audio_in2, stereo: true
-    end
-    sleep get(:track2_len)
-    live_audio :audio_in2, :stop
-    osc "/looper/track_arm/2/2", 0
-    osc "/looper/track2_rec", 0
-    set :track2, 0
-  end
-end
-# Track 3
-if get(:track3) == 1.0
-  in_thread(name: :t3_rec) do
-    sync :play_t3
-    with_fx :record, buffer: t3, pre_amp: get(:rec_level) do
-      osc "/looper/track3_rec", 1
-      live_audio :audio_in3, stereo: true
-    end
-    sleep get(:track_len)
-    live_audio :audio_in3, :stop
-    osc "/looper/track_arm/1/1", 0
-    osc "/looper/track3_rec", 0
-    set :track3, 0
-  end
-end
-# Track 4
-if get(:track4) == 1.0
-  in_thread(name: :t4_rec) do
-    sync :play_t4
-    with_fx :record, buffer: t4, pre_amp: get(:rec_level) do
-      osc "/looper/track4_rec", 1
-      live_audio :audio_in4, stereo: true
-    end
-    sleep get(:track_len)
-    live_audio :audio_in4, :stop
-    osc "/looper/track_arm/1/2", 0
-    osc "/looper/track4_rec", 0
-    set :track4, 0
-  end
-end
 
 # -----------------------------------------------------------------#
 # Feedback Loop Section                                            #

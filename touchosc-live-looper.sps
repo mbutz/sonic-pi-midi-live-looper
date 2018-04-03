@@ -1,5 +1,5 @@
 # key: live looper
-# point_line: 15
+# point_line: 19
 # point_index: 9
 # --
 # Live Looper Library with TouchOSC Control
@@ -26,6 +26,8 @@ set :ip, "192.168.2.150"
 # PORT of mobile device running touchOSC:
 set :port, 4000
 
+use_osc get(:ip), get(:port)
+
 # Set the path where the init and recorder script can be found on your harddisk:
 set :path, "~/projects/sonicpi/github/sonic-pi-live-looper/"
 
@@ -51,16 +53,14 @@ set :metro_vol_master, 4 # master metronome volume
 
 # Track length for your 4 recordings tracks/loops; you can have any number of beats:
 set :track1_len, 8 # length of loop 1
-set :track2_len, 8 # length of loop 2
-set :track3_len, 8 # length of loop 3
+set :track2_len, 4 # length of loop 2
+set :track3_len, 4 # length of loop 3
 set :track4_len, 8 # length of loop 4
 set :fbtrack_len, 8 # length of feedback loops
 
 # -----------------------------------------------------------------#
 # Initialization of looper and touchosc interface                  #
 # -----------------------------------------------------------------#
-
-use_osc get(:ip), get(:port)
 
 # Initialize live looper, see: "touchosc-live-looper-init.rb".
 run_file get(:path) + get(:init)
