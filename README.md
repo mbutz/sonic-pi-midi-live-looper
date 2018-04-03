@@ -68,3 +68,7 @@ end
 ```
 
 Note: The path syntax is for Linux. You will have to adjust the path if working with Windows or MacOSX.
+
+## TODOs
+
+I did recode the mechanism for recording and playing back of the loops. This code is quite messy and repetitive. It will be improved using functions to be easier and ore managable.
