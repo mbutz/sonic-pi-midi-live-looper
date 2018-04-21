@@ -30,6 +30,10 @@ osc "/looper/track3_vol", 0
 osc "/looper/track4_vol", 0
 
 # Show all tracks disarmed for recording
+set :track1, 0
+set :track2, 0
+set :track3, 0
+set :track4, 0
 osc "/looper/track_arm/2/1", 0
 osc "/looper/track_arm/2/2", 0
 osc "/looper/track_arm/1/1", 0
@@ -40,3 +44,6 @@ osc "/looper/track1_rec", 0
 osc "/looper/track2_rec", 0
 osc "/looper/track3_rec", 0
 osc "/looper/track4_rec", 0
+
+# Set track length
+set :track_len, get(:track1_len)
