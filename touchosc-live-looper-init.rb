@@ -29,6 +29,34 @@ osc "/looper/track2_vol", 0
 osc "/looper/track3_vol", 0
 osc "/looper/track4_vol", 0
 
+# Set HPF and LPF
+set :track1_hpf, 1
+set :track1_lpf, 130
+osc "/looper/track1_hpf", 1
+osc "/looper/track1_lpf", 130
+set :track2_hpf, 1
+set :track2_lpf, 130
+osc "/looper/track2_hpf", 1
+osc "/looper/track2_lpf", 130
+set :track3_hpf, 1
+set :track3_lpf, 130
+osc "/looper/track3_hpf", 1
+osc "/looper/track3_lpf", 130
+set :track4_hpf, 1
+set :track4_lpf, 130
+osc "/looper/track4_hpf", 1
+osc "/looper/track4_lpf", 130
+
+# Unmute all tracks
+set :track1_on, 1
+set :track2_on, 1
+set :track3_on, 1
+set :track4_on, 1
+osc "/looper/track1_on", 1
+osc "/looper/track2_on", 1
+osc "/looper/track3_on", 1
+osc "/looper/track4_on", 1
+
 # Show all tracks disarmed for recording
 set :track1, 0
 set :track2, 0

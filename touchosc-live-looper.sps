@@ -1,4 +1,4 @@
-# key: live looper
+# key: touchosc
 # point_line: 19
 # point_index: 9
 # --
@@ -16,12 +16,20 @@
 # If you /do not want to use/ snippets just load this file into
 # a Sonic Pi buffer, adjust the following variables and run it once.
 
+# How to refer to the recorded tracks:
+# cache = "/home/marty/.sonic-pi/store/default/cached_samples"
+#
+# live_loop :play_from_harddisk, sync: :t1 do
+#   sample cache, "track1", rate: 2
+#   sleep 4
+# end
+
 # -----------------------------------------------------------------#
 # Adjust/check these settings                                      #
 # -----------------------------------------------------------------#
 
 # IP of mobile device running touchOSC:
-set :ip, "192.168.2.150"
+set :ip, "[INSERT-IP-HERE]"
 
 # PORT of mobile device running touchOSC:
 set :port, 4000
@@ -53,8 +61,8 @@ set :metro_vol_master, 4 # master metronome volume
 
 # Track length for your 4 recordings tracks/loops; you can have any number of beats:
 set :track1_len, 8 # length of loop 1
-set :track2_len, 4 # length of loop 2
-set :track3_len, 4 # length of loop 3
+set :track2_len, 8 # length of loop 2
+set :track3_len, 8 # length of loop 3
 set :track4_len, 8 # length of loop 4
 set :fbtrack_len, 8 # length of feedback loops
 

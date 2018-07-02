@@ -23,29 +23,50 @@ t2 = buffer[:track2, get(:track2_len)]
 t3 = buffer[:track3, get(:track3_len)]
 t4 = buffer[:track4, get(:track4_len)]
 
-live_loop :t1 do
+live_loop :t1_arm do
   use_real_time
-  c = sync "/osc/looper/track_arm/2/1"
-  set :track1, c[0]
+  a = sync "/osc/looper/track_arm/2/1"
+  set :track1, a[0]
   set :track_len, get(:track1_len)
 end
-live_loop :t2 do
+live_loop :t2_arm do
   use_real_time
-  c = sync "/osc/looper/track_arm/2/2"
-  set :track2, c[0]
+  b = sync "/osc/looper/track_arm/2/2"
+  set :track2, b[0]
   set :track_len, get(:track2_len)
 end
-live_loop :t3 do
+live_loop :t3_arm do
   use_real_time
   c = sync "/osc/looper/track_arm/1/1"
   set :track3, c[0]
   set :track_len, get(:track3_len)
 end
-live_loop :t4 do
+live_loop :t4_arm do
   use_real_time
-  c = sync "/osc/looper/track_arm/1/2"
-  set :track4, c[0]
+  d = sync "/osc/looper/track_arm/1/2"
+  set :track4, d[0]
   set :track_len, get(:track4_len)
+end
+
+live_loop :t1_on do
+  use_real_time
+  a = sync "/osc/looper/track1_on"
+  set :track1_on, a[0]
+end
+live_loop :t2_on do
+  use_real_time
+  b = sync "/osc/looper/track2_on"
+  set :track2_on, b[0]
+end
+live_loop :t3_on do
+  use_real_time
+  c = sync "/osc/looper/track3_on"
+  set :track3_on, c[0]
+end
+live_loop :t4_on do
+  use_real_time
+  e = sync "/osc/looper/track4_on"
+  set :track4_on, e[0]
 end
 
 # -----------------------------------------------------------------#
@@ -57,6 +78,7 @@ live_loop :metro_amp do
   use_real_time
   c = sync "/osc/looper/metro_vol"
   set :metro_vol, c[0]
+  control get(:metronome), amp: get(:metro_vol) * get(:metro_vol_master)
 end
 # Start/stop metronome
 live_loop :metro_onoff do
@@ -66,13 +88,15 @@ live_loop :metro_onoff do
 end
 
 live_loop :beat do
-  sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master) * 0.5, rate: 1.00 if get(:metro_toggle) == 1
+  s = sample :elec_tick, amp: get(:metro_vol) * get(:metro_vol_master) * 0.5, rate: 1.00 if get(:metro_toggle) == 1
+  set :metronome, s
   sleep 1
 end
 
-live_loop :metro do
-  sync :metronome
-  sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 0.75 if get(:metro_toggle) == 1
+live_loop :m do
+  sync :metro
+  s = sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 0.75 if get(:metro_toggle) == 1
+  set :metronome, s
   sleep get(:track_len)
 end
 
@@ -81,55 +105,133 @@ end
 # -----------------------------------------------------------------#
 
 # Play tracks
-live_loop :play_t1 do
-  if get(:track1) == 1.0
-    cue :metronome
-  end
-  sample t1, amp: get(:track1_vol)
-  sleep get(:track1_len)
+live_loop :t1 do
+ on get(:track1) do
+   cue :metro
+ end
+ on get(:track1_on) do
+   r = sample t1, amp: get(:track1_vol), hpf: get(:track1_hpf), lpf: get(:track1_lpf)
+   set :t1_ref, r
+ end
+ sleep get(:track1_len)
 end
-live_loop :play_t2 do
-  if get(:track2) == 1.0
-    cue :metronome
+live_loop :t2 do
+  on get(:track2) do
+    cue :metro
   end
-  sample t2, amp: get(:track2_vol)
+  on get(:track2_on) do
+    r = sample t2, amp: get(:track2_vol), hpf: get(:track2_hpf), lpf: get(:track2_lpf)
+    set :t2_ref, r
+  end
   sleep get(:track2_len)
 end
-live_loop :play_t3 do
-  if get(:track3) == 1.0
-    cue :metronome
+live_loop :t3 do
+  on get(:track3) do
+    cue :metro
   end
-  sample t3, amp: get(:track3_vol)
+  on get(:track3_on) do
+    r = sample t3, amp: get(:track3_vol), hpf: get(:track3_hpf), lpf: get(:track3_lpf)
+    set :t3_ref, r
+  end
   sleep get(:track3_len)
 end
-live_loop :play_t4 do
-  if get(:track4) == 1.0
-    cue :metronome
+live_loop :t4 do
+  on get(:track4) do
+    cue :metro
   end
-  sample t4, amp: get(:track4_vol)
+  on get(:track4_on) do
+    r = sample t4, amp: get(:track4_vol), hpf: get(:track4_hpf), lpf: get(:track4_lpf)
+    set :t4_ref, r
+  end
   sleep get(:track4_len)
 end
 
-# Get playback volume from touchosc
+# Get playback volume, filter and rate settings from touchosc
 live_loop :t1_vol do
   use_real_time
   c = sync "/osc/looper/track1_vol"
   set :track1_vol, c[0]
+  s = get(:t1_ref)
+  control s, amp: c[0]
 end
+live_loop :t1_hpf do
+  use_real_time
+  f = sync "/osc/looper/track1_hpf"
+  set :track1_hpf, f[0]
+  s = get(:t1_ref)
+  control s, hpf: f[0]
+end
+live_loop :t1_lpf do
+  use_real_time
+  f = sync "/osc/looper/track1_lpf"
+  set :track1_lpf, f[0]
+  s = get(:t1_ref)
+  control s, lpf: f[0]
+end
+
 live_loop :t2_vol do
   use_real_time
   c = sync "/osc/looper/track2_vol"
   set :track2_vol, c[0]
+  s = get(:t2_ref)
+  control s, amp: c[0]
 end
+live_loop :t2_hpf do
+  use_real_time
+  f = sync "/osc/looper/track2_hpf"
+  set :track2_hpf, f[0]
+  s = get(:t2_ref)
+  control s, hpf: f[0]
+end
+live_loop :t2_lpf do
+  use_real_time
+  f = sync "/osc/looper/track2_lpf"
+  set :track2_lpf, f[0]
+  s = get(:t2_ref)
+  control s, lpf: f[0]
+end
+
 live_loop :t3_vol do
   use_real_time
   c = sync "/osc/looper/track3_vol"
   set :track3_vol, c[0]
+  s = get(:t3_ref)
+  control s, amp: c[0]
 end
+live_loop :t3_hpf do
+  use_real_time
+  f = sync "/osc/looper/track3_hpf"
+  set :track3_hpf, f[0]
+  s = get(:t3_ref)
+  control s, hpf: f[0]
+end
+live_loop :t3_lpf do
+  use_real_time
+  f = sync "/osc/looper/track3_lpf"
+  set :track3_lpf, f[0]
+  s = get(:t3_ref)
+  control s, lpf: f[0]
+end
+
 live_loop :t4_vol do
   use_real_time
   c = sync "/osc/looper/track4_vol"
   set :track4_vol, c[0]
+  s = get(:t4_ref)
+end
+live_loop :t4_hpf do
+  use_real_time
+  f = sync "/osc/looper/track4_hpf"
+  set :track4_hpf, f[0]
+  s = get(:t4_ref)
+  control s, hpf: f[0]
+end
+live_loop :t4_lpf do
+  use_real_time
+  f = sync "/osc/looper/track4_lpf"
+  set :track4_lpf, f[0]
+  s = get(:t4_ref)
+  control s, lpf: f[0]
 end
 
 
@@ -137,12 +239,12 @@ end
 # Record Tracks                                                    #
 # -----------------------------------------------------------------#
 # # Track 1
-if get(:track1) == 1.0
+on get(:track1) do
   live_loop :t1_rec do
-    use_real_time
+    #use_real_time
     sync :metro
     n = get(:track1_len) / 2.0
-    sleep n + 1
+    sleep n # + 1
     n.times do
       sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
       sleep 1
@@ -163,18 +265,18 @@ if get(:track1) == 1.0
     live_audio :audio_in1, :stop
     osc "/looper/track_arm/2/1", 0
     osc "/looper/track1_rec", 0
-    cue :pt1
+    #cue :pt1
     stop
   end
 end
 
 # Track 2
-if get(:track2) == 1.0
+on get(:track2) do
   live_loop :t2_rec do
-    use_real_time
+    #use_real_time
     sync :metro
     n = get(:track2_len) / 2.0
-    sleep n + 1
+    sleep n # + 1
     n.times do
       sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
       sleep 1
@@ -200,12 +302,12 @@ if get(:track2) == 1.0
 end
 
 # Track 3
-if get(:track3) == 1.0
+on get(:track3) do
   live_loop :t3_rec do
-    use_real_time
+    #use_real_time
     sync :metro
     n = get(:track3_len) / 2.0
-    sleep n + 1
+    sleep n # + 1
     n.times do
       sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
       sleep 1
@@ -231,12 +333,12 @@ if get(:track3) == 1.0
 end
 
 # Track 4
-if get(:track4) == 1.0
+on get(:track4) do
   live_loop :t4_rec do
-    use_real_time
+    #use_real_time
     sync :metro
     n = get(:track4_len) / 2.0
-    sleep n + 1
+    sleep n # + 1
     n.times do
       sample :elec_tick, amp: (get(:metro_vol) * get(:metro_vol_master)) * 2, rate: 1.5 if get(:metro_toggle) == 1
       sleep 1

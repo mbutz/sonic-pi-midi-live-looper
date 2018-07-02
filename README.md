@@ -25,8 +25,11 @@ There are 4 files involved:
 * **Setup Script** (`touchosc-live-looper.sps`) for setup and configuration. Conveniently I load this as a `snippet`, that's why the filename ends with ".sps". Snippets are so far an unsupported feature of Sonic Pi. See [here for more information](https://github.com/samaaron/sonic-pi/issues/587#issuecomment-131945899) about how to setup and use snippets. If you do not want to use snippets just load this file into a Sonic Pi buffer, adjust variables at the top and run it once. 
 * **Initialisation** (`touchosc-live-looper-init.rb`) of the `touchosc` interface.
 * **Libray** (`touchosc-live-looper-lib.rb`)
-* **TouchOSC-layout**: The layout has been made for use on an Android smartphone (layout size 580x320 pixels). Do not unpack and edit this file manually but with touchosc editor available at: https://hexler.net/software/touchosc.
+* **TouchOSC-layout**: The layout has been made for use on an Android smartphone (layout size 580x320 pixels). Do not unpack and edit this file manually but with touchosc editor available at: https://hexler.net/software/touchosc. Note: The layout contains an additional page with High- and Lowpassfilter for each of the recording tracks.
 
+## Arturia MiniLab mkII Live Looper
+
+The folder `arturia_live_looper` contains a midi version of the Live Looper that can be triggered using the Arturia MiniLab mkII Midi controller.
 
 ## Setup
 
@@ -61,7 +64,7 @@ sample "~/.sonic-pi/store/default/cached_samples/tfb.wav"
 Try e. g. with a 4-beat-loop:
 
 ```
-live_loop :my_track, sync: :play_t1 do # for syncing also available: :play_t[2..4]
+live_loop :my_track, sync: :t1 do # for syncing also available: :t[1..4]
   sample "~/.sonic-pi/store/default/cached_samples/track1.wav", beat_stretch: 8
   sleep 8
 end
@@ -71,4 +74,6 @@ Note: The path syntax is for Linux. You will have to adjust the path if working 
 
 ## TODOs
 
-I did recode the mechanism for recording and playing back of the loops. This code is quite messy and repetitive. It will be improved using functions to be easier and ore managable.
+Less redundant code: The code could be much shorter and less redundant if I used functions at the appropriate places. I have not found the time to do that.
+
+Latency: I think the `live looper` shows a latency which I could not track down yet. I'd appreciate some feedback on this if someone has an idea where this comes from and how it could be resolved.
