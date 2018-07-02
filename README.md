@@ -29,7 +29,7 @@ There are 4 files involved:
 
 ## Arturia MiniLab mkII Live Looper
 
-The folder `arturia_live_looper` contains a midi version of the Live Looper that can be triggered using the Arturia MiniLab mkII Midi controller.
+The folder `arturia_live_looper` contains a midi version of the Live Looper that can be triggered using the Arturia MiniLab mkII Midi controller. (With the drawback that the MiniLap is not able to receive Midi control messages about the Live Loopers state.)
 
 ## Setup
 
