@@ -1,19 +1,25 @@
-# Live Looper App for Sonic Pi
+# Live Looper Script for Sonic Pi
 
 ## Introduction
 
-This is an application to capture and loop sound with Sonic Pi; recording and playback will be triggered and controlled by a given Midi controller. I tested the script with an Arturia Beatstep as well as an Arturia MiniLab MKII (note: I have no affiliation whatsoever to Arturia besides the fact that I own the 2 mentioned products of this company).
+This is a script to capture external sound and loop it within Sonic Pi; recording and playback will be triggered and controlled by a given Midi controller. I tested the script with an Arturia Beatstep as well as an Arturia MiniLab MKII (note: I have no affiliation whatsoever to Arturia besides the fact that I own the two mentioned products).
 
-The idea behind it: If you want to play with Sonic Pi together with other musicians you can capture incomming sound, loop it and have some basic playback controls. I wanted to have an external controller so that I can do the recording and playback control of these captured loops without having to code. The (live) coding part is reserved for additional sounds and the manipulation of the recorded sounds.
+The idea behind the Live Looper script: If you want to jam using Sonic Pi together with other musicians, capture incomming sound, loop and work with it. I'd also like to use an external controller so that I can do the recording and playback control of these captured loops without having to code. The (live) coding part is reserved for the manipulation of the recorded sounds and additional sound creation and manipulation within Sonic Pi.
 
 ## Live Looper Concept and Logic
 
-There are 2 live loops constantly running in parallel once you have started this script: `play_track[n]` and `record_track[n]`; length is set by `:t[n]_len` in the configuration section. These live loops will be generated dynamically: if you set `:track_conf[[...],[...]]` you will get 2 tracks with 2 live loops per track; you can configure as much tracks as you want. Note that for full functionality you'll need two midi toggles (play/record) and 3 rotaries (volume, lpf and hpf cutoff) per track. Essential are only the toggles. Of course you will have to set properties for all tracks in the configuration section below). Configure `:track_conf` as well
-as the other variables such as e. g. `t[n]_len` for track length in beats and `t[n]_play` (boolean) to indicate the starting value value for the play toggle (false = do not replay the loop).
+There are two live loops constantly running in parallel once you have started this script:
 
-## Notes on Playing and Recording (e. g. 4 cycles of the loops)
+* `play_track[n]` and 
+* `record_track[n]`
 
-The 'play' live loop is replaying the recorded sample if `t[n]_play == true` and cueing the recording live loop if `t[n]_rec == true`; the record live loop will record if `t[n]_rec == true` or just sleep for configurated length.
+Length of these live loops is set by `:t[n]_len` in the configuration section.
+
+These live loops will be generated dynamically: if you set `:track_conf[[...],[...]]` you will get 2 tracks with 2 live loops per track; you can configure as much tracks as you want. Note that for full functionality you'll need two midi toggles (play/record) and 3 rotaries (volume, lpf and hpf cutoff) per track. Essential are only the toggles. Of course you will have to set properties for all tracks in the configuration. Configure `:track_conf` as well as the other variables such as e. g. `t[n]_len` for track length in beats and `t[n]_play` (boolean) to indicate the starting value for the play toggle (false = do not replay the loop).
+
+## Notes on Playing and Recording (a picture of 4 loop cycles)
+
+The 'play' live loop is replaying the recorded sample if `t[n]_play == true` and cueing the recording live loop if `t[n]_rec == true`; the record live loop will record if `t[n]_rec == true` or just sleep for the configurated length.
 
 Let's assume we are talking about track no 1, meaning live loop `:play_track1` and `:record_track1` both with a length of 8 beats and 4 cycles to see how play and record are working together:
 
@@ -39,8 +45,7 @@ key: - = 1 beat; ->1 = first run; x = some event (e. g. midi toggle or cue/sync)
                                                [if controller accepts midi feedback]
 ```
 
-In cycle 4 `:play_track1` will replay the recorded track1 if `t[1]_play` is true (= associated controller button 'on') and :record_track1 will just sleep.
-
+In cycle 4 `:play_track1` will replay the recorded track1 if `t[1]_play` is true (= associated controller button 'on') and `:record_track1` will just sleep.
 
 ## Components
 

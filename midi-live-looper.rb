@@ -23,8 +23,8 @@
 # get 2 tracks with 2 live_loops per track; you can configure as much tracks as you want. Note
 # that for full functionality you'll need two midi toggles (play/record) and 3 rotaries (volume,
 # lpf and hpf cutoff) per track. Essential are only the toggles. Of course you will have to set
-# properties for all tracks in the configuration section below). Configure :track_conf as well
-# as the simple variables such as e. g. t[n]_len for track length in beats and t[n]_play (boolean)
+# properties for all tracks in the configuration section below. Configure :track_conf as well
+# as the other variables such as e. g. t[n]_len for track length in beats and t[n]_play (boolean)
 # to indicate the starting value value for the play toggle (false = do not replay the loop).
 #
 # Notes on Playing and Recording (e. g. 4 cycles of the loops)
@@ -61,18 +61,11 @@
 #
 ##################################################################################################
 
-# FIXME: TODO ------------------------------------------------------------------------------------
-# Reset all LEDs in loop
-# Find out about sysex (blink purple, reset rotaries)
-# Test with MiniLab
-# FIXME: /TODO -----------------------------------------------------------------------------------
-
 # FIXME: Volume and filter manipulation takes ages with MKII
-# Check first whether it is the same with Beatstep
 # Find out how to fix that
 
 # Set :msg to 1 if you want some feedback such as volume changes
-set :msg, 2 # 0 = none, 1 = info, 2 = debug
+set :msg, 1 # 0 = none, 1 = info, 2 = debug
 set :monitor, true
 set :time_fix_play, -0.05 # latency fix
 
