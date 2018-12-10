@@ -32,14 +32,14 @@ key: - = 1 beat; ->1 = first run; x = some event (e. g. midi toggle or cue/sync)
            x              x                         x                            sample...
    toggle rec pressed     1. cue :record_track1
                           2. metronom signal in-    stop extra metronom signal
-                             dicating reording:
+                             dicating recording:
                              "1...2...3.+.4..+"
  :record_track1
 ->1                       ->2                       ->3                      ->4
 | -  -  -  -  -  -  -  -  | -  -  -  -  -  -  -  -  | -  -  -  -  -  -  -  - | - just sleep...
                           x                         x                       x
                       picks up sync        1. syncs and starts recording    LED cleared
-                                           2. blinking toggle LED if        ^
+                                           2. blinking toggle LED           ^
                                                     ^                       |
                                                     |                       |
                                                [if controller accepts midi feedback]
