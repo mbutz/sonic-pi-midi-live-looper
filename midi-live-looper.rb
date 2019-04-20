@@ -62,204 +62,41 @@
 #
 ##################################################################################################
 
-# FIXME: Volume and filter manipulation takes ages with MKII
-# Find out how to fix that
+use_sched_ahead_time 4
 
 # Set :msg to 1 if you want some feedback such as volume changes
 set :msg, 1 # 0 = none, 1 = info, 2 = debug
 set :monitor, true
 set :time_fix_play, -0.05 # latency fix
 
+set :toggle_metro, false
 set :master_vol_metro, 1 # metro master volume
 set :vol_metro, 0.25 # metro volume, set to 0 if you don't want a metronome at all
 set :rec_metro, get(:vol_metro) # recording metro volume
-set :master_vol_rec, 1 # recording master volume
+set :master_vol_rec, 2 # recording master volume
 set :master_vol_play, 1 # playback master volume
 
-# FIXME: First run of script: fix for error needed: "undefined method 'size' for nil" line 441
-# it seems that :track_conf is not available at first start of the script
+# FIXME: Several problems
+# 1. Combined low/highpass does not work (mainly because I can not initialize the
+# rotaries and because the react somewhat random; simplest solution: don't use
+# the rotaries for filters at all, just for volume)
+
+# 2. While recording the loop will immediatelly played back; it seems at least as if,
+# because the sound will increase in volume during recording; check the mon/monitor stuff
+
+# 3. Recording and playback volume: 2 for both seems okay; do more testing...
 
 set :default_len_track, 8 # default track length
 set :lpf_hpf_combined, true
+set :my_bpm, 120
 
-use_bpm 120 # set BPM here
-
-####################################################################
-# Device specific configuration starts here                        #
-# Live Looper Configuration file for Arturia Beatstep              #
-
-set :midi_port, "arturia_beatstep_midi_1"
-
-# FIXME: Can this also be * (any) or do we need a specific channel?
-set :midi_chan, 10
-
-set :midi_path, "/midi/arturia_beatstep_midi_1/*/10/control_change"
-
-#
-# 8-Track configuration works with Arturia Preset No. 10
-#
+use_bpm get(:my_bpm) # set BPM here
 
 # TODO:
 # + comment :lpf_hpf_combined
 # + check FIXMEs
 # + separate device specific configuration (don't forget to set bpm for both buffers)
-# 
-#
-#
 # + update Git
-
-
-# :track_conf is a wrapper for track variables.
-# Some of these need to be changed during runtime and
-# be set or retrieved using a loop and by index.
-# Volume of track 1 can e. g. be set/retrieved with:
-# set: `set :t1_vol, 0` or `set get(:track_conf)[2][0], 0`
-# get: `get(:t1_vol, 1)` or `get(get(:track_conf))[2][0]`
-# ! Beware of the position of the last round parenthesis !
-# You can get the readable var name with: `get(:track_conf)[2][0]`
-set :track_conf, [
-  # 0: track 1; 1: track 2; ...
-  #   0: name postfix for buffer, recorded sample name (e. g. track1.wav)
-  #   1: length
-  #   2: playback volume
-  #   3: lpf cutoff value
-  #   4: hpf cutoff value
-  #   5: play toggle
-  #   6: record toggle
-  ["track1", :t1_len, :t1_vol, :t1_lpf, :t1_hpf, :t1_play, :t1_rec],
-  ["track2", :t2_len, :t2_vol, :t2_lpf, :t2_hpf, :t2_play, :t2_rec],
-  ["track3", :t3_len, :t3_vol, :t3_lpf, :t3_hpf, :t3_play, :t3_rec],
-  ["track4", :t4_len, :t4_vol, :t4_lpf, :t4_hpf, :t4_play, :t4_rec],
-  ["track5", :t5_len, :t5_vol, :t5_lpf, :t5_hpf, :t5_play, :t5_rec],
-  ["track6", :t6_len, :t6_vol, :t6_lpf, :t6_hpf, :t6_play, :t6_rec],
-  ["track7", :t7_len, :t7_vol, :t7_lpf, :t7_hpf, :t7_play, :t7_rec],
-  ["track8", :t8_len, :t8_vol, :t8_lpf, :t8_hpf, :t8_play, :t8_rec]
-]
-
-# Initial (readable!) track configuration:
-set :t1_len, 8
-set :t1_vol, 2
-set :t1_lpf, 130
-set :t1_hpf, 0
-set :t1_play, false
-set :t1_rec, false
-
-set :t2_len, 8
-set :t2_vol, 1
-set :t2_lpf, 130
-set :t2_hpf, 0
-set :t2_play, false
-set :t2_rec, false
-
-set :t3_len, 8
-set :t3_vol, 1
-set :t3_lpf, 130
-set :t3_hpf, 0
-set :t3_play, false
-set :t3_rec, false
-
-set :t4_len, 8
-set :t4_vol, 1
-set :t4_lpf, 130
-set :t4_hpf, 0
-set :t4_play, false
-set :t4_rec, false
-
-set :t5_len, 16
-set :t5_vol, 1
-set :t5_lpf, 130
-set :t5_hpf, 0
-set :t5_play, false
-set :t5_rec, false
-
-set :t6_len, 16
-set :t6_vol, 1
-set :t6_lpf, 130
-set :t6_hpf, 0
-set :t6_play, false
-set :t6_rec, false
-
-set :t7_len, 16
-set :t7_vol, 1
-set :t7_lpf, 130
-set :t7_hpf, 0
-set :t7_play, false
-set :t7_rec, false
-
-set :t8_len, 16
-set :t8_vol, 1
-set :t8_lpf, 130
-set :t8_hpf, 0
-set :t8_play, false
-set :t8_rec, false
-
-# Midi rotary controller for volume
-set :midi_metro_rot, 7
-
-# List of Midi Pad Numbers per Track: :midi_pads
-# 0: First index for track number: t1 = 0, t2 = 1 etc.
-#   0: play toggle
-#   1: initiate recording toggle
-set :midi_pads, [
-  [52, 56],
-  [53, 57],
-  [54, 58],
-  [55, 59],
-  [102, 106],
-  [103, 107],
-  [104, 108],
-  [105, 109]
-]
-
-# List of Midi Number Knobs per Track: :midi_rotaries
-# 0: First index for track number: t1 = 0, t2 = 1 etc.
-#   0: volume
-#   1: lpf
-#   2: hpf
-set :midi_rotaries, [
-  [16, 24, 24],
-  [17, 25, 25],
-  [18, 26, 26],
-  [19, 27, 27],
-  [20, 28, 28],
-  [21, 29, 29],
-  [22, 30, 30],
-  [23, 31, 31]
-]
-
-# FIXME: Clear all pad LEDs and set rotaries to correct values
-# For Arturia Beatstep and Minilab this will be done via sysex commands
-# once I have figured this out. For the moment the pads can be set via
-# ordinary midi control commands.
-# Basically the following has to be done:
-# 1. Clear LEDs (if you configure 4 channels: 4x record LEC, 4x play LED)
-# 2. Set rotaries to appropriate values: volume to 1, lpf to 65, hpf to 65
-i = 0
-get(:midi_pads).size.times do |i|
-  k = 0
-  get(:midi_pads)[0].size.times do |k|
-    midi_cc get(:midi_pads)[i][k], 0, port: get(:midi_port), channel: get(:midi_chan)
-    msg("i: ", i) if get(:msg) == 2
-    msg("k: ", k) if get(:msg) == 2
-    k =+ 1
-  end
-  i =+ 1
-end
-
-
-# Send start signal for Arturia Beatstep sequencer
-midi_start
-
-# sync Arturia Beatstep sequencer
-live_loop :beatstep do
-  time_warp 0.1 do
-    midi_clock_beat
-  end
-  sleep 1
-end
-
-# Device specific configuration ends here                          #
-####################################################################
 
 # Some Functions                                                   #
 # -----------------------------------------------------------------#
@@ -318,12 +155,15 @@ else
   end
 end
 
-# Start Metronome                                                  #
+# Start Metronome / Sync Beatstep                                  #
 # -----------------------------------------------------------------#
 
+midi_start
+
 live_loop :beat do
-  s = sample :elec_tick, amp: get(:vol_metro)
+  s = sample :elec_tick, amp: get(:vol_metro) if get(:toggle_metro)
   set :beat_metro, s # set pointer for control statement
+  midi_clock_beat
   sleep 1
 end
 
@@ -355,6 +195,13 @@ live_loop :getset_toggle_pads do
       k =+ 1
     end
     i =+ 1
+  end
+
+  # Metro on/off (not within track_conf so let's get this by foot)
+  if s[0] == get(:midi_metro_pad) and s[1] == 127
+    set :toggle_metro, true
+  elsif s[0] == get(:midi_metro_pad) and s[1] == 0
+    set :toggle_metro, false
   end
 end
 
@@ -389,8 +236,8 @@ live_loop :getset_rotary_controllers do
   # Metro volume (not within track_conf so let's get this by foot)
   if s[0] == get(:midi_metro_rot)
     set :vol_metro, scale_val(s[1])
-    control get(:beat_metro), amp: get(:vol_metro)
-    control get(:marker_metro), amp: get(:vol_metro)
+    control get(:beat_metro), amp: get(:vol_metro) * get(:master_vol_metro)
+    control get(:marker_metro), amp: get(:vol_metro) * get(:master_vol_metro)
   end
 end
 
@@ -399,7 +246,7 @@ end
 # marks the "1" in case a track is set up for recording
 live_loop :metro_marking_one do
   sync :rec
-  s = sample :elec_tick, amp: get(:vol_metro) * get(:master_vol_metro), rate: 0.75
+  s = sample :elec_tick, amp: get(:vol_metro), rate: 0.75 if get(:toggle_metro)
   set :marker_metro, s
   sleep get(:default_len_track)
 end
@@ -437,7 +284,7 @@ define :build_playback_loop do |idx|
           n = get(get(:track_conf)[idx][1]) / 2.0
           sleep n
           n.times do
-            m = sample :elec_tick, rate: 1.5, amp: get(:vol_metro) * get(:master_vol_metro)
+            m = sample :elec_tick, rate: 1.5, amp: get(:vol_metro) if get(:toggle_metro) == true
             set :mute_metro, m
             sleep 1
           end
@@ -460,7 +307,7 @@ end
 # if recording toggle true:
 # 1. set it to false, we only want to record one loop running
 # 2. let LED blink (needs support from controller)
-# 3. shut down live audio for monitoring incoming sound while not recording
+# 3. shut down live audio used for monitoring incoming sound while not recording
 # 4. record to prepared buffer for loop length
 # 5. stop recording and clear LED
 # else just sleep for loop length
